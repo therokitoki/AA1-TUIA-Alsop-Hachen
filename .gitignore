@@ -1,2 +1,4 @@
 
 *.pyc
+/sklearn-env
+*.log
