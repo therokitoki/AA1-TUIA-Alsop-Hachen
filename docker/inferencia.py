@@ -120,7 +120,7 @@ if __name__ == "__main__":
     output_path = "/data/output/predictions.csv"
 
     import os
-    print(f"Directorio de trabajo actual: {os.getcwd()}")
+    #print(f"Directorio de trabajo actual: {os.getcwd()}")
     # Leer los datos de entrada desde la línea de comando
     nn = joblib.load("model.pkl")
     scaler = joblib.load("scaler.pkl")
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     columns_bimodal = ['WindSpeed3pm', 'WindSpeed9am', 'Humidity3pm', 'Humidity9am', 'Cloud9am','Cloud3pm', 'Temp3pm', 'MinTemp','Sunshine']
     df[columns_bimodal]= imputer_knn.transform(df[columns_bimodal])
 
-    print(df.isna().sum())
+    #print(df.isna().sum())
 
     #print(df)
     # Mapeamos las direcciones del viento a ángulos
@@ -228,7 +228,7 @@ if __name__ == "__main__":
     x_train_imputer_v2['RainToday'] = x_train_imputer_v2['RainToday'].round()
 
     # Verificamos que no queden Null
-    print(x_train_imputer_v2.isna().sum())
+    #print(x_train_imputer_v2.isna().sum())
 
     #scaler = RobustScaler()
     x_train_scaled = scaler.transform(x_train_imputer_v2)
