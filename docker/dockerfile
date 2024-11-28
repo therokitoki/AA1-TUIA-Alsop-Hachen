@@ -1,12 +1,26 @@
-FROM python:3.10-slim
+# Usar una imagen base de Python
+FROM python:3.10.11-slim
 
+# Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar los archivos necesarios
-COPY docker/ /app/
+# Copiar el archivo requirements.txt y el código al contenedor
+COPY requeriments.txt ./requeriments.txt
+COPY . .
+RUN pip install --upgrade pip
 
-# Instalar las dependencias
-RUN pip install -r requirements.txt
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    g++ \
+    python3-dev \
+    libatlas-base-dev \
+    libopenblas-dev \
+    liblapack-dev\
+    gfortran
+
+# Instalar las dependencias desde el archivo requirements.txt
+RUN pip install --no-cache-dir -r /app/requeriments.txt
 
 # Comando por defecto para ejecutar el script
-CMD ["python", "inferencia.py"]
+CMD ["python", "./inferencia.py"]

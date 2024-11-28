@@ -1,4 +1,5 @@
-pycaret==3.0  # Ajusta según la versión que estés usando
+pycaret
 pandas
+tensorflow
 scikit-learn
-numpy
+joblib
