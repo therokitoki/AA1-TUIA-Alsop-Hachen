@@ -115,9 +115,9 @@ def simpleImputerPerMonth(x_test: pd.DataFrame, imputer_method, columns : list) 
 
 if __name__ == "__main__":
 
-    input_path = "./data/input/weatherAUS.csv"  # Ruta del archivo CSV dentro del contenedor
+    input_path = "/data/input/weatherAUS.csv"  # Ruta del archivo CSV dentro del contenedor
 
-    output_path = "./data/output/predictions.csv"
+    output_path = "/data/output/predictions.csv"
 
     import os
     print(f"Directorio de trabajo actual: {os.getcwd()}")
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     ]
     
     df = df[[col for col in df.columns if col in columns]]
-    
+
     category_variable = ['WindGustDir','WindDir9am','WindDir3pm']
 
     for var in category_variable:
