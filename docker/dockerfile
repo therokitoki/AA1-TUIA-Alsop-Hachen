@@ -1,0 +1,12 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Copiar los archivos necesarios
+COPY docker/ /app/
+
+# Instalar las dependencias
+RUN pip install -r requirements.txt
+
+# Comando por defecto para ejecutar el script
+CMD ["python", "inferencia.py"]

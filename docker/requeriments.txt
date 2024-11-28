@@ -1,0 +1,4 @@
+pycaret==3.0  # Ajusta según la versión que estés usando
+pandas
+scikit-learn
+numpy
