@@ -101,12 +101,32 @@ class NeuralNetwork:
 
 
 if __name__ == "__main__":
+
+    import os
+    print(f"Directorio de trabajo actual: {os.getcwd()}")
     # Leer los datos de entrada desde la línea de comando
     nn = joblib.load("model.pkl")
     scaler = joblib.load("scaler.pkl")
-    input_data = sys.argv[1].split(",")
-    input_data = process_input(input_data)
-    print(input_data)
+    #input_data = sys.argv[1].split(",")
+
+    csv_file = "weatherAUS.csv"
+
+    # Leer el archivo CSV
+    df = pd.read_csv(csv_file)
+
+    # Verificar si existe la columna 'Location' y eliminarla si está presente
+    # Remove any columns not in the predefined list
+
+    # input_data = sys.argv[1]
+
+    # # Divide la cadena en una lista
+    # values = input_data.split(",")
+
+    # # Reemplaza cadenas vacías con NaN
+    # processed_values = [np.nan if v.strip() == "" else v.strip() for v in values]
+
+    # input_data = process_input(processed_values)
+    #print(input_data)
     columns = [
         "Date", "MinTemp", "MaxTemp", "Rainfall", "Evaporation", "Sunshine", 
         "WindGustDir", "WindGustSpeed", "WindDir9am", "WindDir3pm", 
@@ -115,22 +135,23 @@ if __name__ == "__main__":
         "Temp9am", "Temp3pm", "RainToday"
     ]
     
-    df = pd.DataFrame([input_data], columns=columns)
+    df = df[[col for col in df.columns if col in columns]]
 
     category_variable = ['WindGustDir','WindDir9am','WindDir3pm']
 
     for var in category_variable:
         df[var] = df[var].astype(str)
 
-    df['Date'] = df['Date'].astype('datetime64[ns]')
+    df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+
 
     #print(df)
     # Mapeamos las direcciones del viento a ángulos
     angle_map = {
-        ' N': 0, ' NNE': 22.5, ' NE': 45, ' ENE': 67.5,
-        ' E': 90, ' ESE': 112.5, ' SE': 135, ' SSE': 157.5,
-        ' S': 180, ' SSW': 202.5, ' SW': 225, ' WSW': 247.5,
-        ' W': 270, ' WNW': 292.5, ' NW': 315, ' NNW': 337.5
+        'N': 0, 'NNE': 22.5, 'NE': 45, 'ENE': 67.5,
+        'E': 90, 'ESE': 112.5, 'SE': 135, 'SSE': 157.5,
+        'S': 180, 'SSW': 202.5, 'SW': 225, 'WSW': 247.5,
+        'W': 270, 'WNW': 292.5, 'NW': 315, 'NNW': 337.5
     }
 
     # Se mapea cada dirección a su ángulo
@@ -171,9 +192,10 @@ if __name__ == "__main__":
     #scaler = RobustScaler()
     x_train_scaled = scaler.transform(x_train_imputer_v2)
 
-    print(x_train_scaled)
+    #print(x_train_scaled)
 
     pred = nn.predict(x_train_scaled)
-
-    print("Predicción:", pred)
+    pred_df = pd.DataFrame(pred, columns=['Prediction'])
+    print("Predicción:", pred_df.value_counts())
+    pred_df.to_csv('predictions.csv', index=False)
 
