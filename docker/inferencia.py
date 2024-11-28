@@ -96,6 +96,10 @@ class NeuralNetwork:
 
 if __name__ == "__main__":
 
+    input_path = "/data/input/weatherAUS.csv"  # Ruta del archivo CSV dentro del contenedor
+
+    output_path = "/data/output/predictions.csv"
+
     import os
     print(f"Directorio de trabajo actual: {os.getcwd()}")
     # Leer los datos de entrada desde la línea de comando
@@ -106,7 +110,7 @@ if __name__ == "__main__":
     csv_file = "weatherAUS.csv"
 
     # Leer el archivo CSV
-    df = pd.read_csv(csv_file)
+    df = pd.read_csv(input_path)
 
     # Verificar si existe la columna 'Location' y eliminarla si está presente
     # Remove any columns not in the predefined list
@@ -191,5 +195,5 @@ if __name__ == "__main__":
     pred = nn.predict(x_train_scaled)
     pred_df = pd.DataFrame(pred, columns=['Prediction'])
     print("Predicción:", pred_df.value_counts())
-    pred_df.to_csv('predictions.csv', index=False)
+    pred_df.to_csv(output_path, index=False)
 
