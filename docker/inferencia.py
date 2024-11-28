@@ -92,19 +92,43 @@ class NeuralNetwork:
 #     # Realizar la predicción
 #     prediction = pipeline.predict(df.drop(columns=["Date"]))  # Ignorar 'Date' si fue ignorada en el entrenamiento
 #     return "Sí lloverá mañana" if prediction[0] == 1 else "No lloverá mañana"
+def simpleImputerPerMonth(x_test: pd.DataFrame, imputer_method, columns : list) -> tuple:
 
+    """
+    Realiza la imputación de datos según la estrategia elegida, sobre las columnas seleccionadas, agrupando los datos por mes.
+
+    Parámetros:
+        x_train: Dataset de datos de entrenamiento
+        x_test: Dataset de datos de prueba
+        imputer_method: 
+    
+    Retorno: 
+        Tupla que contiene los datos de entrenamientos imputados y los datos de prueba imputados.
+
+    """
+    for month in range(1, 13):
+           
+        # Filtramos el DataFrame por el mes y realizar la imputación
+        test_filter = x_test['Date'].dt.month == month
+        x_test.loc[test_filter, columns] = imputer_method.transform(x_test.loc[test_filter, columns])
+    return(x_test)
 
 if __name__ == "__main__":
 
-    input_path = "/data/input/weatherAUS.csv"  # Ruta del archivo CSV dentro del contenedor
+    input_path = "./data/input/weatherAUS.csv"  # Ruta del archivo CSV dentro del contenedor
 
-    output_path = "/data/output/predictions.csv"
+    output_path = "./data/output/predictions.csv"
 
     import os
     print(f"Directorio de trabajo actual: {os.getcwd()}")
     # Leer los datos de entrada desde la línea de comando
     nn = joblib.load("model.pkl")
     scaler = joblib.load("scaler.pkl")
+    imputer_knn_codificada = joblib.load("imputer_knn_codificada.pkl")
+    imputer_knn = joblib.load("imputer_knn.pkl")
+    imputer_mean = joblib.load("imputer_mean.pkl")
+    imputer_median = joblib.load("imputer_median.pkl")
+    label_encoder_raintoday = joblib.load("label_encoder_raintoday.pkl")
     #input_data = sys.argv[1].split(",")
 
     csv_file = "weatherAUS.csv"
@@ -134,7 +158,7 @@ if __name__ == "__main__":
     ]
     
     df = df[[col for col in df.columns if col in columns]]
-
+    
     category_variable = ['WindGustDir','WindDir9am','WindDir3pm']
 
     for var in category_variable:
@@ -142,6 +166,20 @@ if __name__ == "__main__":
 
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 
+
+    # Imputamos por la media
+    columns_normal = ['MaxTemp', 'Temp9am']
+    df = simpleImputerPerMonth(df, imputer_mean, columns_normal)
+
+    # Imputamos por la mediana
+    columns_asimetric = ['Rainfall', 'Evaporation', 'WindGustSpeed', 'Pressure3pm', 'Pressure9am']
+    df = simpleImputerPerMonth(df, imputer_median, columns_asimetric)
+
+    # Imputamos por KNN
+    columns_bimodal = ['WindSpeed3pm', 'WindSpeed9am', 'Humidity3pm', 'Humidity9am', 'Cloud9am','Cloud3pm', 'Temp3pm', 'MinTemp','Sunshine']
+    df[columns_bimodal]= imputer_knn.transform(df[columns_bimodal])
+
+    print(df.isna().sum())
 
     #print(df)
     # Mapeamos las direcciones del viento a ángulos
@@ -177,16 +215,21 @@ if __name__ == "__main__":
     x_train_imputer_v2 = x_train_mapping.copy()
 
     for var in ['RainToday']:
-        label_encoder = LabelEncoder()
-        
         non_null_train = x_train_imputer_v2[var].notnull()
 
-        
         # Ajusta el codificador en los datos no nulos
-        x_train_imputer_v2.loc[non_null_train, var] = label_encoder.fit_transform(x_train_imputer_v2.loc[non_null_train, var])
+        x_train_imputer_v2.loc[non_null_train, var] = label_encoder_raintoday.transform(x_train_imputer_v2.loc[non_null_train, var])
     
     x_train_imputer_v2 = x_train_imputer_v2.drop(columns=['Date']).reset_index(drop=True)
     
+    # Imputamos las columnas codificadas
+    columns_bimodal_cat = ['WindGustDir_angulo_cos','WindGustDir_angulo_sin','WindDir9am_angulo_cos','WindDir9am_angulo_sin','WindDir3pm_angulo_cos','WindDir3pm_angulo_sin','RainToday']
+    x_train_imputer_v2[columns_bimodal_cat]= imputer_knn_codificada.transform(x_train_imputer_v2[columns_bimodal_cat])
+    x_train_imputer_v2['RainToday'] = x_train_imputer_v2['RainToday'].round()
+
+    # Verificamos que no queden Null
+    print(x_train_imputer_v2.isna().sum())
+
     #scaler = RobustScaler()
     x_train_scaled = scaler.transform(x_train_imputer_v2)
 
