@@ -1,12 +1,6 @@
-from pycaret.classification import load_model
 import pandas as pd
-import sys
-from pycaret.classification import load_model
-from pycaret.classification import predict_model
 import pandas as pd
 import tensorflow as tf
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 import warnings
 warnings.simplefilter('ignore')
 from tensorflow.keras import regularizers
