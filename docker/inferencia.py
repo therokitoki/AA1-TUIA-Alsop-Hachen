@@ -167,9 +167,9 @@ def simpleImputerPerMonth(x_test: pd.DataFrame, imputer_method, columns : list) 
 
 if __name__ == "__main__":
 
-    input_path = "./data/input/weatherAUS.csv"  # Ruta del archivo CSV dentro del contenedor
+    input_path = "/data/input/input.csv"  # Ruta del archivo CSV dentro del contenedor
 
-    output_path = "./data/output/predictions.csv"
+    output_path = "/data/output/predictions.csv"
 
     import os
     nn = joblib.load("model.pkl")
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     label_encoder_raintoday = joblib.load("label_encoder_raintoday.pkl")
     #input_data = sys.argv[1].split(",")
 
-    csv_file = "weatherAUS.csv"
+    csv_file = "input.csv"
 
     # Leer el archivo CSV
     df = pd.read_csv(input_path)
