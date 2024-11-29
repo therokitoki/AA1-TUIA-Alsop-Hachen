@@ -1,5 +1,4 @@
 import pandas as pd
-import pandas as pd
 import tensorflow as tf
 import warnings
 warnings.simplefilter('ignore')
@@ -23,32 +22,93 @@ def process_input(input_data):
     
     return processed_data
 
-class NeuralNetwork:
-    def __init__(self, epochs=50, batch_size=16, learning_rate=0.01):
+# class NeuralNetwork:
+#     def __init__(self, epochs=50, batch_size=16, learning_rate=0.01):
+#         self.epochs = epochs
+#         self.batch_size = batch_size
+#         self.learning_rate = learning_rate
+#         self.model = None
+    
+#     def build_model(self, input_shape):
+#         # Definir el modelo con 3 capas ocultas
+#         model = tf.keras.models.Sequential([
+#             # Capa densa con regularización L2
+#             tf.keras.layers.Dense(30, activation='relu', kernel_regularizer=regularizers.l2(0.01), input_shape=(input_shape,)),
+#             tf.keras.layers.Dropout(0.3),  # Dropout para evitar sobreajuste
+#             tf.keras.layers.Dense(26, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
+#             tf.keras.layers.Dropout(0.3),
+#             tf.keras.layers.Dense(24, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
+#             tf.keras.layers.Dropout(0.3),
+#             # Capa de salida con sigmoide para clasificación binaria
+#             tf.keras.layers.Dense(1, activation='sigmoid')
+#         ])
+
+#         # Ajustar la tasa de aprendizaje
+#         optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)  # Reducir la tasa de aprendizaje si es necesario
+#         model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])  # Función de pérdida binaria
+
+#         self.model = model
+
+#     def fit(self, X_train, y_train, X_valid, y_valid):
+#         # simplemente el fit del modelo. Devuelvo la evolución de la función de pérdida, ya que es interesante ver como varía a medida que aumentan las épocas!
+#         history=self.model.fit(X_train, y_train, validation_data=(X_valid, y_valid), epochs=self.epochs, batch_size=self.batch_size)
+#         return history.history['loss'], history.history['val_loss']
+
+#     def evaluate(self, X_test, y_test):
+#         ### evalúo en test
+#         loss, accuracy = self.model.evaluate(X_test, y_test)
+#         print(f"test accuracy: {accuracy:.4f}")
+
+#     def predict(self, X_new):
+#         ### predicciones
+#         predictions = self.model.predict(X_new)
+#         predicted_classes = (predictions > 0.5).astype(int)
+#         return predicted_classes
+
+class NeuralNetworkOptimized:
+    def __init__(self, epochs=50, batch_size=16, learning_rate=0.01,):
+        #inicializo algunos parámetros como épocas, batch_size, learning rate
+        #(no son necesarios)
+        #se puede agregar la cantidad de capas, la cantidad de neuronas por capa (pensando en hacer una clase que pueda ser usada para cualquier caso)
         self.epochs = epochs
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.model = None
     
-    def build_model(self, input_shape):
-        # Definir el modelo con 3 capas ocultas
-        model = tf.keras.models.Sequential([
-            # Capa densa con regularización L2
-            tf.keras.layers.Dense(30, activation='relu', kernel_regularizer=regularizers.l2(0.01), input_shape=(input_shape,)),
-            tf.keras.layers.Dropout(0.3),  # Dropout para evitar sobreajuste
-            tf.keras.layers.Dense(26, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
-            tf.keras.layers.Dropout(0.3),
-            tf.keras.layers.Dense(24, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
-            tf.keras.layers.Dropout(0.3),
-            # Capa de salida con sigmoide para clasificación binaria
-            tf.keras.layers.Dense(1, activation='sigmoid')
-        ])
+    def build_model(self):
+        # # Definir el modelo con 3 capas ocultas
+        # model = tf.keras.models.Sequential([
+        #     # Capa densa con regularización L2
+        #     tf.keras.layers.Dense(30, activation='relu', kernel_regularizer=regularizers.l2(0.01), input_shape=(input_shape,)),
+        #     tf.keras.layers.Dropout(0.3),  # Dropout para evitar sobreajuste
+        #     tf.keras.layers.Dense(26, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
+        #     tf.keras.layers.Dropout(0.3),
+        #     tf.keras.layers.Dense(24, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
+        #     tf.keras.layers.Dropout(0.3),
+        #     # Capa de salida con sigmoide para clasificación binaria
+        #     tf.keras.layers.Dense(1, activation='sigmoid')
+        # ])
 
-        # Ajustar la tasa de aprendizaje
+        # # Ajustar la tasa de aprendizaje
+        # optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)  # Reducir la tasa de aprendizaje si es necesario
+        # model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])  # Función de pérdida binaria
+
+
+        model = Sequential()
+
+        model.add(Dense(60, activation='relu', kernel_regularizer=regularizers.l2(0.01))) # capas densas con activacion ReLU
+        model.add(Dense(41, activation='relu', kernel_regularizer=regularizers.l2(0.01))) # capas densas con activacion ReLU
+        model.add(Dense(55, activation='relu', kernel_regularizer=regularizers.l2(0.01))) # capas densas con activacion ReLU
+
+        # capa de salida
+        model.add(Dense(1, activation='sigmoid'))
+
+        # compilar
         optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)  # Reducir la tasa de aprendizaje si es necesario
-        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])  # Función de pérdida binaria
+        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
         self.model = model
+
 
     def fit(self, X_train, y_train, X_valid, y_valid):
         # simplemente el fit del modelo. Devuelvo la evolución de la función de pérdida, ya que es interesante ver como varía a medida que aumentan las épocas!
@@ -59,12 +119,27 @@ class NeuralNetwork:
         ### evalúo en test
         loss, accuracy = self.model.evaluate(X_test, y_test)
         print(f"test accuracy: {accuracy:.4f}")
+        #return loss, accuracy
 
     def predict(self, X_new):
         ### predicciones
         predictions = self.model.predict(X_new)
-        predicted_classes = (predictions > 0.5).astype(int)
-        return predicted_classes
+        return predictions
+    
+    def evaluate_metrics(self, y_test, y_pred):
+                # Calcular métricas
+        accuracy = accuracy_score(y_test, y_pred)
+        conf_matrix = confusion_matrix(y_test, y_pred)
+
+        # Mostrar resultados
+        print(f"Accuracy: {accuracy:.4f}")
+        print("\nConfusion Matrix:")
+        print(conf_matrix)
+
+        # Opcional: mostrar un reporte de clasificación
+        print("\nClassification Report:")
+        print(classification_report(y_test, y_pred))
+
 
 def simpleImputerPerMonth(x_test: pd.DataFrame, imputer_method, columns : list) -> tuple:
 
@@ -84,22 +159,25 @@ def simpleImputerPerMonth(x_test: pd.DataFrame, imputer_method, columns : list) 
     for month in meses:
         # Filtramos el DataFrame por el mes y realizar la imputación
         test_filter = x_test['Date'].dt.month == month
-        x_test.loc[test_filter, columns] = imputer_method.transform(x_test.loc[test_filter, columns])
+
+        imputer = joblib.load(f"imputer_{imputer_method}_{month}.pkl")
+
+        x_test.loc[test_filter, columns] = imputer.transform(x_test.loc[test_filter, columns])
     return(x_test)
 
 if __name__ == "__main__":
 
-    input_path = "/data/input/weatherAUS.csv"  # Ruta del archivo CSV dentro del contenedor
+    input_path = "./data/input/weatherAUS.csv"  # Ruta del archivo CSV dentro del contenedor
 
-    output_path = "/data/output/predictions.csv"
+    output_path = "./data/output/predictions.csv"
 
     import os
     nn = joblib.load("model.pkl")
     scaler = joblib.load("scaler.pkl")
     imputer_knn_codificada = joblib.load("imputer_knn_codificada.pkl")
     imputer_knn = joblib.load("imputer_knn.pkl")
-    imputer_mean = joblib.load("imputer_mean.pkl")
-    imputer_median = joblib.load("imputer_median.pkl")
+    #imputer_mean = joblib.load("imputer_mean.pkl")
+    #imputer_median = joblib.load("imputer_median.pkl")
     label_encoder_raintoday = joblib.load("label_encoder_raintoday.pkl")
     #input_data = sys.argv[1].split(",")
 
@@ -128,11 +206,11 @@ if __name__ == "__main__":
 
     # Imputamos por la media
     columns_normal = ['MaxTemp', 'Temp9am']
-    df = simpleImputerPerMonth(df, imputer_mean, columns_normal)
+    df = simpleImputerPerMonth(df, 'mean', columns_normal)
 
     # Imputamos por la mediana
     columns_asimetric = ['Rainfall', 'Evaporation', 'WindGustSpeed', 'Pressure3pm', 'Pressure9am']
-    df = simpleImputerPerMonth(df, imputer_median, columns_asimetric)
+    df = simpleImputerPerMonth(df, 'median', columns_asimetric)
 
     # Imputamos por KNN
     columns_bimodal = ['WindSpeed3pm', 'WindSpeed9am', 'Humidity3pm', 'Humidity9am', 'Cloud9am','Cloud3pm', 'Temp3pm', 'MinTemp','Sunshine']
@@ -184,7 +262,8 @@ if __name__ == "__main__":
     x_train_scaled = scaler.transform(x_train_imputer_v2)
 
     pred = nn.predict(x_train_scaled)
-    pred_df = pd.DataFrame(pred, columns=['Prediction'])
+    predicted_classes = (pred > 0.5).astype(int)
+    pred_df = pd.DataFrame(predicted_classes, columns=['Prediction'])
     print("Predicción:", pred_df.value_counts())
     pred_df.to_csv(output_path, index=False)
 
