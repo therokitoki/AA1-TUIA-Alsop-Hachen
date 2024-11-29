@@ -7,9 +7,8 @@ from tensorflow.keras import regularizers
 from tensorflow.keras.callbacks import EarlyStopping
 import numpy as np
 from sklearn.preprocessing import RobustScaler
-
+from sklearn.preprocessing import LabelEncoder
 import joblib
-
 import sys
 
 def process_input(input_data):
@@ -26,9 +25,6 @@ def process_input(input_data):
 
 class NeuralNetwork:
     def __init__(self, epochs=50, batch_size=16, learning_rate=0.01):
-        #inicializo algunos parámetros como épocas, batch_size, learning rate
-        #(no son necesarios)
-        #se puede agregar la cantidad de capas, la cantidad de neuronas por capa (pensando en hacer una clase que pueda ser usada para cualquier caso)
         self.epochs = epochs
         self.batch_size = batch_size
         self.learning_rate = learning_rate
@@ -70,28 +66,6 @@ class NeuralNetwork:
         predicted_classes = (predictions > 0.5).astype(int)
         return predicted_classes
 
-# def predict(input_data):
-#     # Definir las columnas en el orden correcto
-#     columns = [
-#         "Date", "MinTemp", "MaxTemp", "Rainfall", "Evaporation", "Sunshine", 
-#         "WindGustDir", "WindGustSpeed", "WindDir9am", "WindDir3pm", 
-#         "WindSpeed9am", "WindSpeed3pm", "Humidity9am", "Humidity3pm", 
-#         "Pressure9am", "Pressure3pm", "Cloud9am", "Cloud3pm", 
-#         "Temp9am", "Temp3pm", "RainToday"
-#     ]
-
-#     # Crear un DataFrame con los datos de entrada
-#     df = pd.DataFrame([input_data], columns=columns)
-
-#     # Convertir tipos si es necesario
-#     df["Date"] = pd.to_datetime(df["Date"])  # Asegurar que la fecha esté en formato datetime
-#     categorical_columns = ["WindGustDir", "WindDir9am", "WindDir3pm", "RainToday"]
-#     for col in categorical_columns:
-#         df[col] = df[col].astype("category")
-
-#     # Realizar la predicción
-#     prediction = pipeline.predict(df.drop(columns=["Date"]))  # Ignorar 'Date' si fue ignorada en el entrenamiento
-#     return "Sí lloverá mañana" if prediction[0] == 1 else "No lloverá mañana"
 def simpleImputerPerMonth(x_test: pd.DataFrame, imputer_method, columns : list) -> tuple:
 
     """
@@ -106,8 +80,8 @@ def simpleImputerPerMonth(x_test: pd.DataFrame, imputer_method, columns : list) 
         Tupla que contiene los datos de entrenamientos imputados y los datos de prueba imputados.
 
     """
-    for month in range(1, 13):
-           
+    meses = list(x_test['Date'].dt.month.unique())
+    for month in meses:
         # Filtramos el DataFrame por el mes y realizar la imputación
         test_filter = x_test['Date'].dt.month == month
         x_test.loc[test_filter, columns] = imputer_method.transform(x_test.loc[test_filter, columns])
@@ -120,8 +94,6 @@ if __name__ == "__main__":
     output_path = "/data/output/predictions.csv"
 
     import os
-    #print(f"Directorio de trabajo actual: {os.getcwd()}")
-    # Leer los datos de entrada desde la línea de comando
     nn = joblib.load("model.pkl")
     scaler = joblib.load("scaler.pkl")
     imputer_knn_codificada = joblib.load("imputer_knn_codificada.pkl")
@@ -136,19 +108,6 @@ if __name__ == "__main__":
     # Leer el archivo CSV
     df = pd.read_csv(input_path)
 
-    # Verificar si existe la columna 'Location' y eliminarla si está presente
-    # Remove any columns not in the predefined list
-
-    # input_data = sys.argv[1]
-
-    # # Divide la cadena en una lista
-    # values = input_data.split(",")
-
-    # # Reemplaza cadenas vacías con NaN
-    # processed_values = [np.nan if v.strip() == "" else v.strip() for v in values]
-
-    # input_data = process_input(processed_values)
-    #print(input_data)
     columns = [
         "Date", "MinTemp", "MaxTemp", "Rainfall", "Evaporation", "Sunshine", 
         "WindGustDir", "WindGustSpeed", "WindDir9am", "WindDir3pm", 
@@ -179,9 +138,7 @@ if __name__ == "__main__":
     columns_bimodal = ['WindSpeed3pm', 'WindSpeed9am', 'Humidity3pm', 'Humidity9am', 'Cloud9am','Cloud3pm', 'Temp3pm', 'MinTemp','Sunshine']
     df[columns_bimodal]= imputer_knn.transform(df[columns_bimodal])
 
-    #print(df.isna().sum())
 
-    #print(df)
     # Mapeamos las direcciones del viento a ángulos
     angle_map = {
         'N': 0, 'NNE': 22.5, 'NE': 45, 'ENE': 67.5,
@@ -208,9 +165,6 @@ if __name__ == "__main__":
 
     x_train_mapping = x_train_mapping.drop(columns=['Month'])
     
-    #print(df)
-    from sklearn.preprocessing import LabelEncoder
-
     # Hacemos una copia para trabajar en ella
     x_train_imputer_v2 = x_train_mapping.copy()
 
@@ -227,13 +181,7 @@ if __name__ == "__main__":
     x_train_imputer_v2[columns_bimodal_cat]= imputer_knn_codificada.transform(x_train_imputer_v2[columns_bimodal_cat])
     x_train_imputer_v2['RainToday'] = x_train_imputer_v2['RainToday'].round()
 
-    # Verificamos que no queden Null
-    #print(x_train_imputer_v2.isna().sum())
-
-    #scaler = RobustScaler()
     x_train_scaled = scaler.transform(x_train_imputer_v2)
-
-    #print(x_train_scaled)
 
     pred = nn.predict(x_train_scaled)
     pred_df = pd.DataFrame(pred, columns=['Prediction'])
