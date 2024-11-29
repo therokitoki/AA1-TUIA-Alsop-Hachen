@@ -51,8 +51,9 @@ La estructura del proyecto debería verse de la siguiente manera:
 
 ### En Windows
 
-1. Navega al directorio `docker/` en la terminal.
-2. Ejecuta el siguiente comando para construir la imagen de Docker:
+1. Asegúrate de ejecutar Docker.
+2. Navega al directorio `docker/` en la terminal.
+3. Ejecuta el siguiente comando para construir la imagen de Docker:
 
 ```bash
 build_docker_win.bat
@@ -60,8 +61,9 @@ build_docker_win.bat
 
 ### En Linux
 
-1. Navega al directorio `docker/` en la terminal.
-2. Ejecuta el siguiente comando para construir la imagen de Docker:
+1. Asegúrate de ejecutar Docker.
+2. Navega al directorio `docker/` en la terminal.
+3. Ejecuta el siguiente comando para construir la imagen de Docker:
 
 ```bash
 build_docker_linux.sh
